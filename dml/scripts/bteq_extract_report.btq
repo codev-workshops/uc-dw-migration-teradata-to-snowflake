@@ -1,0 +1,82 @@
+/*********************************************************************
+ * BTEQ Monthly Extract Script
+ * Exports regulatory and management reports
+ * Uses BTEQ .EXPORT in different formats
+ *********************************************************************/
+
+.LOGON TDPROD/etl_svc_acct,;
+
+.SET WIDTH 250;
+.SET SEPARATOR '|';
+
+DATABASE BANKING_DW;
+
+/* ================================================================
+   Export 1: Large Transaction Report (CSV for regulatory submission)
+   ================================================================ */
+.EXPORT DATA FILE=/etl/exports/large_txn_report_YYYYMM.csv;
+
+SEL
+    TRANSACTION_ID (BIGINT, FORMAT 'Z(18)9'),
+    TRANSACTION_DATE (FORMAT 'YYYY-MM-DD'),
+    CUSTOMER_ID (FORMAT 'Z(9)9'),
+    FIRST_NAME (CHAR(50)),
+    LAST_NAME (CHAR(50)),
+    KYC_STATUS (CHAR(15)),
+    ACCOUNT_ID (CHAR(20)),
+    ACCOUNT_TYPE (CHAR(20)),
+    TRANSACTION_TYPE (CHAR(20)),
+    TRANSACTION_AMOUNT (FORMAT 'SZZZ,ZZZ,ZZ9.99'),
+    TRANSACTION_CURRENCY (CHAR(3)),
+    BASE_CURRENCY_AMOUNT (FORMAT 'SZZZ,ZZZ,ZZ9.99'),
+    IS_INTERNATIONAL (FORMAT '9'),
+    REPORTING_CATEGORY (CHAR(25)),
+    MERCHANT_NAME (CHAR(100)),
+    REFERENCE_NUMBER (CHAR(30))
+FROM BANKING_DW.VW_REGULATORY_LARGE_TRANSACTIONS
+WHERE TRANSACTION_DATE BETWEEN ADD_MONTHS(CURRENT_DATE, -1)
+                          AND CURRENT_DATE
+ORDER BY TRANSACTION_DATE, TRANSACTION_ID;
+
+.EXPORT RESET;
+
+.IF ACTIVITYCOUNT = 0 THEN .GOTO NODATA;
+
+/* ================================================================
+   Export 2: Branch Performance Summary (formatted report)
+   ================================================================ */
+.EXPORT REPORT FILE=/etl/exports/branch_performance_YYYYMM.rpt;
+
+SEL
+    BRANCH_NAME (CHAR(40)) AS "Branch",
+    REGION (CHAR(15)) AS "Region",
+    MONTH_LABEL (CHAR(20)) AS "Month",
+    ACCOUNTS_SERVICED (FORMAT 'Z(6)9') AS "Accounts",
+    TOTAL_DEPOSITS (FORMAT 'ZZZ,ZZZ,ZZZ,ZZ9.99') AS "Total Deposits (NOK)",
+    TOTAL_FEES_EARNED (FORMAT 'ZZZ,ZZZ,ZZ9.99') AS "Fees Earned",
+    REGION_DEPOSIT_RANK (FORMAT 'Z9') AS "Rank",
+    PCT_OF_REGION_DEPOSITS (FORMAT 'ZZ9.99') AS "% Region"
+FROM BANKING_DW.VW_BRANCH_PERFORMANCE
+WHERE SNAPSHOT_MONTH_KEY = (EXTRACT(YEAR FROM ADD_MONTHS(CURRENT_DATE, -1)) * 100)
+                          + EXTRACT(MONTH FROM ADD_MONTHS(CURRENT_DATE, -1))
+ORDER BY REGION, REGION_DEPOSIT_RANK;
+
+.EXPORT RESET;
+
+/* ================================================================
+   Export 3: AML Screening Results
+   ================================================================ */
+.EXPORT DATA FILE=/etl/exports/aml_screening_YYYYMMDD.csv;
+
+EXEC BANKING_DW.AML_SCREENING(CURRENT_DATE, 30, 50000.00);
+
+.EXPORT RESET;
+
+SEL 'Monthly reports exported successfully at ' ||
+    TRIM(CURRENT_TIMESTAMP(0) (FORMAT 'YYYY-MM-DDBHH:MI:SS'));
+
+.QUIT 0;
+
+.LABEL NODATA;
+SEL 'WARNING: No large transactions found for the reporting period.';
+.QUIT 4;

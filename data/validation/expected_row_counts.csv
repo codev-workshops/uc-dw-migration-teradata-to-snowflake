@@ -1,0 +1,8 @@
+TABLE_NAME|EXPECTED_ROW_COUNT|AS_OF_DATE|NOTES
+DIM_CUSTOMER|15|2026-01-31|Sample seed data - 15 Norwegian customers
+DIM_ACCOUNT|20|2026-01-31|Sample seed data - 20 accounts across customers
+DIM_PRODUCT|10|2026-01-31|10 banking products
+DIM_BRANCH|14|2026-01-31|14 branches across 5 Norwegian regions
+DIM_DATE|10958|2026-01-31|30 years of dates (2000-01-01 to 2029-12-31)
+FACT_TRANSACTION|50000|2026-01-31|Approximate - depends on generated synthetic data
+FACT_MONTHLY_ACCOUNT_SNAPSHOT|1920|2026-01-31|Approximate - 20 accounts x 96 months (8 years)

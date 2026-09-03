@@ -1,0 +1,16 @@
+CUSTOMER_ID|FIRST_NAME|LAST_NAME|DATE_OF_BIRTH|GENDER|MARITAL_STATUS|EMAIL_ADDRESS|PHONE_NUMBER|ADDRESS_LINE_1|ADDRESS_LINE_2|CITY|STATE_PROVINCE|POSTAL_CODE|COUNTRY_CODE|CUSTOMER_SEGMENT|RISK_SCORE|CREDIT_RATING|KYC_STATUS|ONBOARDING_DATE|IS_ACTIVE
+1001|Erik|Hansen|1985-03-15|M|M|erik.hansen@example.no|+47 912 34 567|Storgata 12||Oslo|Oslo|0155|NOR|PREMIUM|72.50|AA|VERIFIED|2015-06-01|1
+1002|Ingrid|Johansen|1990-07-22|F|S|ingrid.johansen@example.no|+47 923 45 678|Karl Johans gate 45|Leilighet 3B|Oslo|Oslo|0162|NOR|RETAIL|45.00|A|VERIFIED|2018-01-15|1
+1003|Lars|Andersen|1978-11-03|M|M|lars.andersen@example.no|+47 934 56 789|Bryggen 7||Bergen|Vestland|5003|NOR|PREMIUM|68.30|AA|VERIFIED|2012-09-20|1
+1004|Kari|Olsen|1965-01-28|F|D|kari.olsen@example.no|+47 945 67 890|Munkegata 15||Trondheim|Trondelag|7011|NOR|RETAIL|38.75|BBB|VERIFIED|2020-03-10|1
+1005|Bjorn|Nilsen|1992-05-14|M|S|bjorn.nilsen@example.no|+47 956 78 901|Strandgata 22||Tromso|Troms og Finnmark|9008|NOR|RETAIL|52.10|A|VERIFIED|2019-07-25|1
+1006|Astrid|Berg|1988-09-30|F|M|astrid.berg@example.no|+47 967 89 012|Kirkegata 8|PB 201|Stavanger|Rogaland|4006|NOR|PRIVATE|85.20|AAA|VERIFIED|2010-11-01|1
+1007|Magnus|Dahl|1972-12-08|M|M|magnus.dahl@example.no|+47 978 90 123|Kongens gate 33||Kristiansand|Agder|4611|NOR|CORPORATE|91.40|AAA|VERIFIED|2008-04-15|1
+1008|Sofie|Larsen|1995-04-17|F|S|sofie.larsen@example.no|+47 989 01 234|Nordre gate 5||Lillehammer|Innlandet|2609|NOR|RETAIL|29.50|BBB|PENDING|2024-01-08|1
+1009|Henrik|Pedersen|1983-08-21|M|M|henrik.pedersen@example.no|+47 990 12 345|Torggata 19||Drammen|Viken|3015|NOR|PREMIUM|61.80|A|VERIFIED|2016-05-30|1
+1010|Maria|Haugen|1970-02-14|F|W|maria.haugen@example.no|+47 901 23 456|Havnegata 3||Alesund|More og Romsdal|6002|NOR|RETAIL|44.20|BBB|REVIEW|2017-08-12|1
+1011|Ole|Kristiansen|1960-06-05|M|M|ole.kristiansen@example.no|+47 912 34 000|Fjordveien 11||Molde|More og Romsdal|6413|NOR|PREMIUM|73.60|AA|VERIFIED|2005-02-28|1
+1012|Silje|Eriksen|1998-10-25|F|S|silje.eriksen@example.no|+47 923 45 111|Universitetsgata 1|Rom 405|Oslo|Oslo|0164|NOR|RETAIL|22.30|BB|VERIFIED|2023-09-01|1
+1013|Thomas|Moen|1975-07-11|M|D|thomas.moen@example.no|+47 934 56 222|Industriveien 45||Sandefjord|Vestfold og Telemark|3211|NOR|CORPORATE|88.90|AAA|VERIFIED|2009-11-15|1
+1014|Lise|Bakke|1982-03-29|F|M|lise.bakke@example.no|+47 945 67 333|Strandpromenaden 7||Fredrikstad|Viken|1605|NOR|PREMIUM|65.40|A|VERIFIED|2014-06-20|1
+1015|Anders|Solberg|1991-12-01|M|S|anders.solberg@example.no|+47 956 78 444|Sjogata 14||Bodo|Nordland|8006|NOR|RETAIL|41.70|BBB|VERIFIED|2021-04-05|1
