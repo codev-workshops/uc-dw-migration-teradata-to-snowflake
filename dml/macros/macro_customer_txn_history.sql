@@ -1,3 +1,37 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.CUSTOMER_TXN_HISTORY (macro)
+-- FILE   : dml/macros/macro_customer_txn_history.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Customer statement macro returning transaction history for one
+--     customer over a date range, optionally filtered by transaction
+--     type.
+--
+-- INPUT / OUTPUT TABLES
+--   * Reads: BANKING_DW.FACT_TRANSACTION, BANKING_DW.DIM_ACCOUNT,
+--     BANKING_DW.DIM_CUSTOMER
+--   * Writes: none (read-only, returns a result set)
+--   * Parameters: cust_id, start_date (default DATE - 30), end_date
+--     (default DATE), txn_type (default 'ALL')
+--
+-- KEY BUSINESS RULES
+--   * Filters to CUSTOMER_ID = cust_id via current (CURRENT_FLAG='Y')
+--     customer and account versions.
+--   * TRANSACTION_DATE between start_date and end_date inclusive.
+--   * txn_type = 'ALL' applies no type filter; any other value matches
+--     TRANSACTION_TYPE exactly.
+--   * PAYEE = MERCHANT_NAME, else COUNTERPARTY_ACCT, else '--'; ordered
+--     newest first and limited to a 1000-row SAMPLE.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * REPLACE MACRO with typed parameters, DEFAULT values and :param
+--     references
+--   * SEL shorthand for SELECT
+--   * SAMPLE 1000 row sampling clause
+--   * DATE FORMAT 'YYYY-MM-DD' parameter type; inline (FORMAT
+--     'HH:MI:SS') / (FORMAT 'S ZZZ,ZZZ,ZZ9.99') expressions
+-- ======================================================================
+
 /**********************************************************************
  * MACRO_CUSTOMER_TXN_HISTORY
  * Retrieves transaction history for a specific customer

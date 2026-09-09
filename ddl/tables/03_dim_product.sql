@@ -1,3 +1,34 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.DIM_PRODUCT (dimension table)
+-- FILE   : ddl/tables/03_dim_product.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Defines the banking product catalog dimension (deposits, lending,
+--     cards, investment, insurance, payments) with rates, balance limits
+--     and fee structure.
+--
+-- INPUT / OUTPUT TABLES
+--   * Creates: BANKING_DW.DIM_PRODUCT
+--   * Referenced by: BANKING_DW.DIM_ACCOUNT (PRODUCT_ID),
+--     BANKING_DW.FACT_TRANSACTION (PRODUCT_ID),
+--     BANKING_DW.FACT_MONTHLY_ACCOUNT_SNAPSHOT (PRODUCT_ID)
+--
+-- KEY BUSINESS RULES
+--   * PRODUCT_ID is the natural/primary key (no surrogate, not SCD Type
+--     2 - Type 1 overwrite dimension).
+--   * IS_REGULATED and IS_ACTIVE default to 1; MIN_BALANCE and
+--     MONTHLY_FEE default to 0.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * CREATE SET TABLE
+--   * NO FALLBACK, NO BEFORE JOURNAL, NO AFTER JOURNAL, CHECKSUM =
+--     DEFAULT, DEFAULT MERGEBLOCKRATIO table options
+--   * NOT CASESPECIFIC; FORMAT 'YYYY-MM-DD'; COMPRESS value lists /
+--     COMPRESS 0
+--   * UNIQUE PRIMARY INDEX plus secondary INDEX definitions
+--   * COLLECT STATISTICS; COMMENT ON TABLE
+-- ======================================================================
+
 /**********************************************************************
  * DIM_PRODUCT — Banking Product Dimension
  * Teradata SET table with single-column primary index

@@ -1,3 +1,44 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.FACT_TRANSACTION (fact table)
+-- FILE   : ddl/tables/06_fact_transaction.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Defines the daily transaction fact table - the largest table in
+--     the warehouse - holding one row per posted transaction with
+--     amounts, currency conversion, channel and merchant details.
+--
+-- INPUT / OUTPUT TABLES
+--   * Creates: BANKING_DW.FACT_TRANSACTION
+--   * References: BANKING_DW.DIM_ACCOUNT (ACCOUNT_KEY),
+--     BANKING_DW.DIM_CUSTOMER (CUSTOMER_KEY), BANKING_DW.DIM_PRODUCT
+--     (PRODUCT_ID), BANKING_DW.DIM_BRANCH (BRANCH_ID),
+--     BANKING_DW.DIM_DATE (DATE_KEY)
+--   * Loaded by: BANKING_DW.SP_LOAD_DAILY_TRANSACTIONS; read by
+--     SP_MONTHLY_SNAPSHOT, all macros and views
+--
+-- KEY BUSINESS RULES
+--   * Star-schema grain: one row per transaction (TRANSACTION_ID);
+--     surrogate FKs to account and customer, natural-key FKs to product,
+--     branch and date.
+--   * TRANSACTION_CURRENCY defaults to 'NOK'; BASE_CURRENCY_AMOUNT holds
+--     the NOK-converted amount and EXCHANGE_RATE defaults to 1.000000.
+--   * IS_INTERNATIONAL and IS_FLAGGED default to 0; FLAG_REASON stores
+--     the suspicious-activity reason.
+--   * Partitioned by TRANSACTION_DATE in monthly ranges (2018-2030) with
+--     NO RANGE catch-all partition for partition elimination.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * CREATE MULTISET TABLE
+--   * NO FALLBACK, NO BEFORE JOURNAL, NO AFTER JOURNAL, CHECKSUM =
+--     DEFAULT, DEFAULT MERGEBLOCKRATIO table options
+--   * NOT CASESPECIFIC; FORMAT 'YYYY-MM-DD'; TIME(0)/TIMESTAMP(6);
+--     BYTEINT
+--   * COMPRESS value lists / COMPRESS ''
+--   * Non-unique composite PRIMARY INDEX (ACCOUNT_KEY, TRANSACTION_DATE)
+--   * PARTITION BY RANGE_N ... EACH INTERVAL '1' MONTH, NO RANGE (PPI)
+--   * COLLECT STATISTICS incl. COLUMN (PARTITION); COMMENT ON TABLE
+-- ======================================================================
+
 /**********************************************************************
  * FACT_TRANSACTION — Daily Transaction Fact Table
  * Teradata MULTISET table with Partitioned Primary Index (PPI)

@@ -1,3 +1,42 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.AML_SCREENING (macro)
+-- FILE   : dml/macros/macro_aml_screening.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Anti-Money Laundering screening macro returning three result sets
+--     of suspicious transaction patterns over a configurable lookback
+--     window and amount threshold.
+--
+-- INPUT / OUTPUT TABLES
+--   * Reads: BANKING_DW.FACT_TRANSACTION, BANKING_DW.DIM_ACCOUNT,
+--     BANKING_DW.DIM_CUSTOMER
+--   * Writes: none (read-only, returns result sets)
+--   * Parameters: screening_date (default DATE), lookback_days (default
+--     30), amount_threshold (default 50000.00 NOK)
+--
+-- KEY BUSINESS RULES
+--   * Pattern 1 STRUCTURING: >= 3 CREDIT/DEBIT transactions per
+--     customer/account with BASE_CURRENCY_AMOUNT between 80% and 100% of
+--     the threshold within the lookback window.
+--   * Pattern 2 RAPID_MOVEMENT: a CREDIT >= threshold followed within
+--     0-3 days by a DEBIT/TRANSFER >= 90% of the threshold on the same
+--     account.
+--   * Pattern 3 NEW_CUSTOMER_INTL: customers onboarded within the last
+--     90 days whose international (IS_INTERNATIONAL=1) transactions in
+--     the window total >= threshold.
+--   * All patterns use only current (CURRENT_FLAG='Y') customer and
+--     account versions; amounts are evaluated in NOK base currency.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * REPLACE MACRO with typed parameters, DEFAULT values and :param
+--     references
+--   * Multiple statements / result sets in one macro
+--   * SEL shorthand for SELECT
+--   * DATE FORMAT 'YYYY-MM-DD' parameter type; inline (FORMAT
+--     'ZZZ,ZZZ,ZZ9.99') / (FORMAT 'YYYY-MM-DD') expressions
+--   * Teradata DATE arithmetic (date - integer days)
+-- ======================================================================
+
 /**********************************************************************
  * MACRO_AML_SCREENING
  * Anti-Money Laundering screening macro

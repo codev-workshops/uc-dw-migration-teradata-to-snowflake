@@ -1,3 +1,41 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.FACT_MONTHLY_ACCOUNT_SNAPSHOT (fact table)
+-- FILE   : ddl/tables/07_fact_monthly_snapshot.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Defines the periodic month-end snapshot fact table with
+--     opening/closing/avg/min/max balances, debit/credit totals,
+--     interest, fees, overdraft and dormancy days.
+--
+-- INPUT / OUTPUT TABLES
+--   * Creates: BANKING_DW.FACT_MONTHLY_ACCOUNT_SNAPSHOT
+--   * References: BANKING_DW.DIM_ACCOUNT (ACCOUNT_KEY),
+--     BANKING_DW.DIM_CUSTOMER (CUSTOMER_KEY), BANKING_DW.DIM_PRODUCT
+--     (PRODUCT_ID), BANKING_DW.DIM_BRANCH (BRANCH_ID)
+--   * Loaded by: BANKING_DW.SP_MONTHLY_SNAPSHOT (MERGE); read by
+--     VW_CUSTOMER_360 and VW_BRANCH_PERFORMANCE
+--
+-- KEY BUSINESS RULES
+--   * Star-schema grain: one row per account per calendar month
+--     (ACCOUNT_KEY, SNAPSHOT_MONTH_KEY); SNAPSHOT_MONTH_KEY is YYYYMM,
+--     SNAPSHOT_DATE is the month-end date.
+--   * Totals/counts/interest/fees default to 0; CURRENCY_CODE defaults
+--     to 'NOK'; BASE_CURRENCY_CLOSING holds the NOK closing balance.
+--   * Partitioned by SNAPSHOT_DATE in monthly ranges (2018-2030) with NO
+--     RANGE catch-all partition.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * CREATE MULTISET TABLE
+--   * NO FALLBACK, NO BEFORE JOURNAL, NO AFTER JOURNAL, CHECKSUM =
+--     DEFAULT, DEFAULT MERGEBLOCKRATIO table options
+--   * FORMAT 'YYYY-MM-DD'; SMALLINT with single-value COMPRESS 0;
+--     COMPRESS value lists
+--   * Non-unique composite PRIMARY INDEX (ACCOUNT_KEY,
+--     SNAPSHOT_MONTH_KEY)
+--   * PARTITION BY RANGE_N ... EACH INTERVAL '1' MONTH, NO RANGE (PPI)
+--   * COLLECT STATISTICS incl. COLUMN (PARTITION); COMMENT ON TABLE
+-- ======================================================================
+
 /**********************************************************************
  * FACT_MONTHLY_ACCOUNT_SNAPSHOT — Month-End Balance Snapshot
  * Periodic snapshot fact table, one row per account per month

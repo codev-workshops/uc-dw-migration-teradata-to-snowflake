@@ -1,3 +1,54 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.SP_MONTHLY_SNAPSHOT (stored procedure)
+-- FILE   : dml/stored_procedures/sp_monthly_snapshot.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Builds the month-end account snapshot for a given year/month by
+--     aggregating transactions into a volatile table and merging results
+--     into the snapshot fact.
+--
+-- INPUT / OUTPUT TABLES
+--   * Reads: BANKING_DW.FACT_TRANSACTION, BANKING_DW.DIM_ACCOUNT,
+--     BANKING_DW.DIM_CUSTOMER, BANKING_DW.FACT_MONTHLY_ACCOUNT_SNAPSHOT
+--     (prior month row)
+--   * Writes: BANKING_DW.FACT_MONTHLY_ACCOUNT_SNAPSHOT (MERGE
+--     insert/update); session-scoped VT_TXN_AGGREGATES volatile table
+--     (created and dropped)
+--   * Parameters: IN p_snapshot_year, p_snapshot_month, p_batch_id; OUT
+--     p_rows_merged, p_return_code
+--
+-- KEY BUSINESS RULES
+--   * Period = first to last day of the month; SNAPSHOT_DATE = month-
+--     end; SNAPSHOT_MONTH_KEY = year*100 + month; prior snapshot looked
+--     up one month back.
+--   * TOTAL_DEBITS / DEBIT_COUNT from DEBIT and FEE types (absolute
+--     amounts); TOTAL_CREDITS / CREDIT_COUNT from CREDIT and INTEREST
+--     types.
+--   * INTEREST_EARNED = positive INTEREST amounts; INTEREST_CHARGED =
+--     negative INTEREST amounts; FEES_CHARGED = FEE amounts.
+--   * DAYS_IN_OVERDRAFT = count of transactions with negative
+--     RUNNING_BALANCE; MIN/MAX/AVG balance from RUNNING_BALANCE.
+--   * OPENING_BALANCE = prior month CLOSING_BALANCE (0 if none);
+--     CLOSING_BALANCE = opening + credits - debits.
+--   * Only current (CURRENT_FLAG='Y') accounts with ACCOUNT_STATUS in
+--     ('ACTIVE','DORMANT'); accounts with no activity get DAYS_DORMANT =
+--     days in period.
+--   * Existing (ACCOUNT_KEY, SNAPSHOT_MONTH_KEY) rows are updated,
+--     otherwise inserted; p_rows_merged from ACTIVITY_COUNT.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * REPLACE PROCEDURE with IN/OUT parameters
+--   * CREATE VOLATILE TABLE ... WITH DATA PRIMARY INDEX ON COMMIT
+--     PRESERVE ROWS
+--   * MERGE INTO ... WHEN MATCHED / WHEN NOT MATCHED
+--   * SEL shorthand for SELECT
+--   * ZEROIFNULL; ADD_MONTHS; date arithmetic
+--   * Inline FORMAT expressions (FORMAT '9999', FORMAT '99') and
+--     Teradata inline casts (SMALLINT)
+--   * ACTIVITY_COUNT
+--   * COLLECT STATISTICS inside procedure
+-- ======================================================================
+
 /**********************************************************************
  * SP_MONTHLY_SNAPSHOT
  * Calculates month-end account snapshots from transaction data

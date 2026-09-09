@@ -1,3 +1,52 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.SP_LOAD_DAILY_TRANSACTIONS (stored procedure)
+-- FILE   : dml/stored_procedures/sp_load_daily_transactions.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Loads one batch date of staged transactions into the transaction
+--     fact table, rejecting rows for unknown accounts, converting
+--     amounts to NOK and logging progress/errors.
+--
+-- INPUT / OUTPUT TABLES
+--   * Reads: BANKING_DW.STG_TRANSACTIONS, BANKING_DW.DIM_ACCOUNT,
+--     BANKING_DW.DIM_CUSTOMER, BANKING_DW.DIM_EXCHANGE_RATES
+--   * Writes: BANKING_DW.FACT_TRANSACTION (insert),
+--     BANKING_DW.STG_TRANSACTION_ERRORS (insert rejects),
+--     BANKING_DW.ETL_LOG (insert start/complete/error rows)
+--   * Parameters: IN p_batch_date, IN p_batch_id; OUT p_rows_inserted,
+--     p_rows_rejected, p_return_code
+--
+-- KEY BUSINESS RULES
+--   * Rejects staged transactions (LOAD_DATE = p_batch_date) whose
+--     ACCOUNT_ID has no current (CURRENT_FLAG='Y') match in DIM_ACCOUNT
+--     into STG_TRANSACTION_ERRORS with ERROR_REASON='INVALID_ACCOUNT'.
+--   * Valid rows are joined to the current DIM_ACCOUNT and DIM_CUSTOMER
+--     versions to resolve ACCOUNT_KEY, CUSTOMER_KEY, PRODUCT_ID and
+--     BRANCH_ID.
+--   * Non-NOK amounts are converted to NOK base currency via
+--     DIM_EXCHANGE_RATES (FROM_CURRENCY -> 'NOK' on TRANSACTION_DATE); a
+--     missing rate yields ZEROIFNULL -> 0 amount/rate.
+--   * IS_INTERNATIONAL = 1 when CURRENCY_CODE <> 'NOK', else 0.
+--   * DATE_KEY derived as INTEGER YYYYMMDD; TRANSACTION_TS built from
+--     date + time.
+--   * Row counts captured via ACTIVITY_COUNT; INFO rows written to
+--     ETL_LOG at start and completion (with duration), ERROR row with
+--     SQLCODE on exception.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * REPLACE PROCEDURE with IN/OUT parameters; DATE FORMAT 'YYYY-MM-DD'
+--     parameter type
+--   * DECLARE EXIT HANDLER FOR SQLEXCEPTION; SQLCODE
+--   * ACTIVITY_COUNT
+--   * SEL shorthand for SELECT
+--   * ZEROIFNULL
+--   * Inline FORMAT expressions (FORMAT '-999999', FORMAT 'Z(9)9', DATE
+--     FORMAT 'YYYYMMDD')
+--   * Teradata type casts: (TIMESTAMP(6)), INTERVAL HOUR TO SECOND
+--     arithmetic, SECOND(4)
+--   * COLLECT STATISTICS inside procedure
+-- ======================================================================
+
 /**********************************************************************
  * SP_LOAD_DAILY_TRANSACTIONS
  * Loads daily transaction data from staging to fact table

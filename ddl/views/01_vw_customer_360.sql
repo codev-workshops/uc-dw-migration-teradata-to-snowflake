@@ -1,3 +1,35 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.VW_CUSTOMER_360 (view)
+-- FILE   : ddl/views/01_vw_customer_360.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Customer 360 view combining demographics, account counts/balances
+--     and last-90-day transaction activity for active current customers.
+--
+-- INPUT / OUTPUT TABLES
+--   * Creates: BANKING_DW.VW_CUSTOMER_360
+--   * Reads: BANKING_DW.DIM_CUSTOMER, BANKING_DW.DIM_ACCOUNT,
+--     BANKING_DW.FACT_MONTHLY_ACCOUNT_SNAPSHOT,
+--     BANKING_DW.FACT_TRANSACTION
+--
+-- KEY BUSINESS RULES
+--   * Only current (CURRENT_FLAG='Y') and IS_ACTIVE=1 customers are
+--     returned.
+--   * TENURE_YEARS = (CURRENT_DATE - ONBOARDING_DATE) / 365.25.
+--   * TOTAL_BALANCE sums the latest monthly snapshot CLOSING_BALANCE per
+--     current account (QUALIFY ROW_NUMBER = 1 by SNAPSHOT_DATE DESC).
+--   * Transaction metrics cover the trailing 90 days; PRIMARY_CHANNEL is
+--     simplified to MAX(CHANNEL).
+--   * Missing aggregates are coerced to 0 via ZEROIFNULL.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * REPLACE VIEW; LOCKING ROW FOR ACCESS
+--   * SEL shorthand for SELECT
+--   * QUALIFY ROW_NUMBER() OVER (...) window filtering
+--   * ZEROIFNULL; inline (FORMAT 'ZZZ,ZZZ,ZZ9.99') expressions
+--   * GROUP BY ordinal position; COMMENT ON VIEW
+-- ======================================================================
+
 /**********************************************************************
  * VW_CUSTOMER_360 — Customer 360 View
  * Aggregates customer, account, and transaction data

@@ -1,3 +1,38 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.VW_REGULATORY_LARGE_TRANSACTIONS (view)
+-- FILE   : ddl/views/02_vw_regulatory_large_transactions.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Regulatory reporting view listing transactions that exceed NOK
+--     reporting thresholds or have been flagged as suspicious, enriched
+--     with customer, account and branch attributes.
+--
+-- INPUT / OUTPUT TABLES
+--   * Creates: BANKING_DW.VW_REGULATORY_LARGE_TRANSACTIONS
+--   * Reads: BANKING_DW.FACT_TRANSACTION, BANKING_DW.DIM_ACCOUNT,
+--     BANKING_DW.DIM_CUSTOMER, BANKING_DW.DIM_BRANCH
+--
+-- KEY BUSINESS RULES
+--   * Includes rows where BASE_CURRENCY_AMOUNT >= 100000, or
+--     IS_INTERNATIONAL=1 and BASE_CURRENCY_AMOUNT >= 25000, or
+--     IS_FLAGGED=1.
+--   * REPORTING_CATEGORY: THRESHOLD_EXCEEDED / INTL_THRESHOLD /
+--     FLAGGED_SUSPICIOUS / REVIEW (evaluated in that order).
+--   * Joins only current (CURRENT_FLAG='Y') account and customer
+--     versions; branch join is optional (LEFT JOIN).
+--   * Deduplicates to the latest ETL_BATCH_ID per TRANSACTION_ID;
+--     ROW_HASH = HASHROW(TRANSACTION_ID, TRANSACTION_DATE) for
+--     reconciliation.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * REPLACE VIEW; LOCKING ROW FOR ACCESS
+--   * SEL shorthand for SELECT
+--   * Inline (NOT CASESPECIFIC) column attribute
+--   * HASHROW() hashing function
+--   * QUALIFY ROW_NUMBER() OVER (...) window filtering
+--   * COMMENT ON VIEW
+-- ======================================================================
+
 /**********************************************************************
  * VW_REGULATORY_LARGE_TRANSACTIONS — Regulatory Reporting View
  * Identifies transactions above reporting thresholds

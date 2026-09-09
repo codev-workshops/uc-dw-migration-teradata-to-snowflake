@@ -1,3 +1,39 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.DAILY_BALANCE_CHECK (macro)
+-- FILE   : dml/macros/macro_daily_balance_check.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Daily balance reconciliation macro: summarises end-of-day balances
+--     by account type/currency and lists accounts with negative
+--     balances.
+--
+-- INPUT / OUTPUT TABLES
+--   * Reads: BANKING_DW.DIM_ACCOUNT, BANKING_DW.FACT_TRANSACTION,
+--     BANKING_DW.DIM_CUSTOMER
+--   * Writes: none (read-only, returns result sets)
+--   * Parameters: check_date
+--
+-- KEY BUSINESS RULES
+--   * Latest balance per account is the RUNNING_BALANCE of the last
+--     transaction (by TRANSACTION_TS) on check_date, selected with
+--     QUALIFY ROW_NUMBER = 1.
+--   * BALANCE_SUMMARY: count/sum/avg/min/max of latest balances for
+--     current (CURRENT_FLAG='Y') ACTIVE accounts grouped by ACCOUNT_TYPE
+--     and CURRENCY_CODE.
+--   * NEGATIVE_BALANCE_ALERT: current accounts with RUNNING_BALANCE < 0,
+--     excluding CREDIT_CARD and LOAN account types; reports
+--     OVER_LIMIT_AMOUNT = balance - OVERDRAFT_LIMIT.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * REPLACE MACRO with DATE FORMAT 'YYYY-MM-DD' parameter and :param
+--     references
+--   * Multiple statements / result sets in one macro
+--   * SEL shorthand for SELECT
+--   * QUALIFY ROW_NUMBER() OVER (...) window filtering
+--   * Inline (FORMAT 'ZZZ,ZZZ,ZZ9.99') / (FORMAT 'S ZZZ,ZZZ,ZZ9.99')
+--     expressions
+-- ======================================================================
+
 /**********************************************************************
  * MACRO_DAILY_BALANCE_CHECK
  * Teradata macro for daily balance reconciliation

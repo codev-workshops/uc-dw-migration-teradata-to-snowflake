@@ -31,6 +31,8 @@ The data warehouse models a **retail banking analytics** environment with:
 - **Monthly account snapshot** — month-end balances and aggregates
 - **Regulatory reporting views** — pre-built views for compliance reports
 
+Column-level metadata for every table is in [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md).
+
 ## Teradata-Specific Features Used
 
 These features require explicit conversion when migrating to Snowflake:

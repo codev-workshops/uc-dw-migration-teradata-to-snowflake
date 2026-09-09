@@ -1,3 +1,36 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.DIM_DATE (dimension table)
+-- FILE   : ddl/tables/05_dim_date.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Defines the pre-populated calendar dimension with ISO week, fiscal
+--     year, Norwegian holiday and business-day flags, and prior/next-day
+--     navigation columns.
+--
+-- INPUT / OUTPUT TABLES
+--   * Creates: BANKING_DW.DIM_DATE
+--   * Referenced by: BANKING_DW.FACT_TRANSACTION (DATE_KEY),
+--     BANKING_DW.VW_BRANCH_PERFORMANCE (joined on CALENDAR_DATE =
+--     SNAPSHOT_DATE)
+--
+-- KEY BUSINESS RULES
+--   * DATE_KEY is an INTEGER smart key in YYYYMMDD format; CALENDAR_DATE
+--     is the equivalent DATE.
+--   * DAY_OF_WEEK uses 1=Monday ... 7=Sunday; QUARTER_NAME is Q1-Q4.
+--   * IS_BUSINESS_DAY, IS_WEEKEND, IS_MONTH_END, IS_QUARTER_END,
+--     IS_YEAR_END are mandatory BYTEINT flags; IS_NORWEGIAN_HOLIDAY
+--     defaults to 0.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * CREATE SET TABLE
+--   * NO FALLBACK, NO BEFORE JOURNAL, NO AFTER JOURNAL, CHECKSUM =
+--     DEFAULT, DEFAULT MERGEBLOCKRATIO table options
+--   * FORMAT 'YYYY-MM-DD' on DATE columns; BYTEINT data type
+--   * COMPRESS value lists / COMPRESS ''
+--   * UNIQUE PRIMARY INDEX plus secondary (composite) INDEX definitions
+--   * COLLECT STATISTICS; COMMENT ON TABLE
+-- ======================================================================
+
 /**********************************************************************
  * DIM_DATE — Date Dimension
  * Pre-populated calendar table with Norwegian business day flags

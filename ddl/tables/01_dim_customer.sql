@@ -1,3 +1,43 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.DIM_CUSTOMER (dimension table)
+-- FILE   : ddl/tables/01_dim_customer.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Defines the SCD Type 2 customer dimension holding demographics,
+--     address, segmentation, risk score, credit rating and KYC status.
+--
+-- INPUT / OUTPUT TABLES
+--   * Creates: BANKING_DW.DIM_CUSTOMER
+--   * Referenced by: BANKING_DW.FACT_TRANSACTION (CUSTOMER_KEY),
+--     BANKING_DW.FACT_MONTHLY_ACCOUNT_SNAPSHOT (CUSTOMER_KEY),
+--     BANKING_DW.DIM_ACCOUNT (CUSTOMER_ID natural key)
+--   * Loaded by: BANKING_DW.SP_CUSTOMER_SCD2 from
+--     BANKING_DW.STG_CUSTOMER
+--
+-- KEY BUSINESS RULES
+--   * CUSTOMER_KEY is the identity surrogate key (one per customer
+--     version); CUSTOMER_ID is the natural key from the source system.
+--   * SCD Type 2 control columns: EFFECTIVE_FROM, EFFECTIVE_TO (default
+--     '9999-12-31 23:59:59'), CURRENT_FLAG (default 'Y'). Only
+--     CURRENT_FLAG='Y' rows are the active version.
+--   * COUNTRY_CODE defaults to 'NOR'; KYC_STATUS defaults to 'PENDING';
+--     IS_ACTIVE defaults to 1.
+--   * Partitioned by ONBOARDING_DATE in yearly ranges (2000-2030).
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * CREATE SET TABLE (duplicate rows rejected)
+--   * NO FALLBACK, NO BEFORE JOURNAL, NO AFTER JOURNAL, CHECKSUM =
+--     DEFAULT, DEFAULT MERGEBLOCKRATIO table options
+--   * GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) on
+--     CUSTOMER_KEY
+--   * NOT CASESPECIFIC on VARCHAR/CHAR columns
+--   * FORMAT 'YYYY-MM-DD' on DATE columns
+--   * COMPRESS value lists (multi-value compression)
+--   * UNIQUE PRIMARY INDEX plus secondary INDEX definitions
+--   * PARTITION BY RANGE_N (partitioned primary index, PPI)
+--   * COLLECT STATISTICS; COMMENT ON TABLE / COLUMN
+-- ======================================================================
+
 /**********************************************************************
  * DIM_CUSTOMER — Customer Dimension
  * Teradata SET table with primary index on CUSTOMER_ID

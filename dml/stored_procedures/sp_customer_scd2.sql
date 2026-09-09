@@ -1,3 +1,45 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.SP_CUSTOMER_SCD2 (stored procedure)
+-- FILE   : dml/stored_procedures/sp_customer_scd2.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Applies SCD Type 2 changes to the customer dimension: expires
+--     changed current rows and inserts new versions for changed and
+--     brand-new customers.
+--
+-- INPUT / OUTPUT TABLES
+--   * Reads: BANKING_DW.STG_CUSTOMER, BANKING_DW.DIM_CUSTOMER
+--   * Writes: BANKING_DW.DIM_CUSTOMER (update expired rows, insert new
+--     versions)
+--   * Parameters: IN p_batch_id; OUT p_new_rows, p_changed,
+--     p_return_code
+--
+-- KEY BUSINESS RULES
+--   * Change detection compares staging vs current (CURRENT_FLAG='Y')
+--     row on CUSTOMER_SEGMENT, RISK_SCORE, CREDIT_RATING, KYC_STATUS,
+--     ADDRESS_LINE_1, CITY, STATE_PROVINCE, POSTAL_CODE, PHONE_NUMBER,
+--     EMAIL_ADDRESS (NULL-safe via COALESCE) and MARITAL_STATUS.
+--   * Step 1 expires changed rows: CURRENT_FLAG='N', EFFECTIVE_TO=now,
+--     ETL_UPDATE_TS=now, ETL_BATCH_ID=p_batch_id.
+--   * Step 2 inserts new versions for every staged customer without a
+--     current row: CURRENT_FLAG='Y', EFFECTIVE_FROM=now,
+--     EFFECTIVE_TO='9999-12-31 23:59:59', IS_ACTIVE=1,
+--     LAST_REVIEW_DATE=CURRENT_DATE.
+--   * COUNTRY_CODE defaults to 'NOR' when missing; ONBOARDING_DATE is
+--     carried from the most recent expired version (QUALIFY latest
+--     EFFECTIVE_TO) or CURRENT_DATE for new customers.
+--   * p_changed / p_new_rows populated from ACTIVITY_COUNT; statistics
+--     recollected on CUSTOMER_ID and CURRENT_FLAG.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * REPLACE PROCEDURE with IN/OUT parameters
+--   * UPDATE ... FROM (derived table) join-update syntax
+--   * SEL shorthand for SELECT
+--   * QUALIFY ROW_NUMBER() OVER (...) window filtering
+--   * ACTIVITY_COUNT
+--   * COLLECT STATISTICS inside procedure
+-- ======================================================================
+
 /**********************************************************************
  * SP_CUSTOMER_SCD2
  * Applies SCD Type 2 changes to the customer dimension

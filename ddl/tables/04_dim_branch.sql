@@ -1,3 +1,36 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.DIM_BRANCH (dimension table)
+-- FILE   : ddl/tables/04_dim_branch.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Defines the branch / location dimension with Norwegian regional
+--     hierarchy (city, county, region), geo-coordinates and branch type.
+--
+-- INPUT / OUTPUT TABLES
+--   * Creates: BANKING_DW.DIM_BRANCH
+--   * Referenced by: BANKING_DW.DIM_ACCOUNT (BRANCH_ID),
+--     BANKING_DW.FACT_TRANSACTION (BRANCH_ID),
+--     BANKING_DW.FACT_MONTHLY_ACCOUNT_SNAPSHOT (BRANCH_ID),
+--     BANKING_DW.VW_BRANCH_PERFORMANCE,
+--     BANKING_DW.VW_REGULATORY_LARGE_TRANSACTIONS
+--
+-- KEY BUSINESS RULES
+--   * BRANCH_ID is the natural/primary key; BRANCH_CODE is an alternate
+--     business key (Type 1 dimension, no SCD control columns).
+--   * COUNTRY_CODE defaults to 'NOR'; IS_ACTIVE defaults to 1.
+--   * REGION values limited to the five Norwegian regions used for
+--     compression.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * CREATE SET TABLE
+--   * NO FALLBACK, NO BEFORE JOURNAL, NO AFTER JOURNAL, CHECKSUM =
+--     DEFAULT, DEFAULT MERGEBLOCKRATIO table options
+--   * NOT CASESPECIFIC; FORMAT 'YYYY-MM-DD'; COMPRESS value lists /
+--     COMPRESS 0
+--   * UNIQUE PRIMARY INDEX plus secondary INDEX definitions
+--   * COLLECT STATISTICS; COMMENT ON TABLE
+-- ======================================================================
+
 /**********************************************************************
  * DIM_BRANCH — Branch / Location Dimension
  * Teradata SET table with geographic hierarchy

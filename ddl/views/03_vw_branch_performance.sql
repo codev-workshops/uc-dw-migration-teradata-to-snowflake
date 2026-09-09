@@ -1,3 +1,39 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.VW_BRANCH_PERFORMANCE (view)
+-- FILE   : ddl/views/03_vw_branch_performance.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Monthly branch performance dashboard view: accounts/customers
+--     serviced, deposits, volume, fees, interest income, cumulative
+--     fees, 3-month moving average volume and regional rankings.
+--
+-- INPUT / OUTPUT TABLES
+--   * Creates: BANKING_DW.VW_BRANCH_PERFORMANCE
+--   * Reads: BANKING_DW.FACT_MONTHLY_ACCOUNT_SNAPSHOT,
+--     BANKING_DW.DIM_BRANCH, BANKING_DW.DIM_DATE
+--
+-- KEY BUSINESS RULES
+--   * Only active branches (IS_ACTIVE=1) and snapshots within the
+--     trailing 24 months (ADD_MONTHS(CURRENT_DATE, -24)).
+--   * TOTAL_VOLUME = TOTAL_DEBITS + TOTAL_CREDITS; TOTAL_DEPOSITS =
+--     SUM(CLOSING_BALANCE).
+--   * CUMULATIVE_FEES_YTD is a cumulative sum ordered by
+--     SNAPSHOT_MONTH_KEY; MOVING_AVG_VOLUME_3M is a 3-period moving
+--     average.
+--   * REGION_DEPOSIT_RANK ranks branches by deposits within
+--     region/month; PCT_OF_REGION_DEPOSITS divides by region total with
+--     NULLIFZERO guard.
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * REPLACE VIEW; LOCKING ROW FOR ACCESS
+--   * SEL shorthand for SELECT
+--   * Teradata OLAP functions CSUM and MAVG
+--   * NULLIFZERO; ADD_MONTHS
+--   * Inline (FORMAT '9999') / (FORMAT 'ZZZ,ZZZ,ZZZ,ZZ9.99') / (FORMAT
+--     'ZZ9.99') expressions
+--   * COMMENT ON VIEW
+-- ======================================================================
+
 /**********************************************************************
  * VW_BRANCH_PERFORMANCE — Branch Performance Dashboard View
  * Uses OLAP functions, CSUM, MAVG, and Teradata-specific syntax

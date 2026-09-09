@@ -1,3 +1,45 @@
+-- ======================================================================
+-- OBJECT : BANKING_DW.DIM_ACCOUNT (dimension table)
+-- FILE   : ddl/tables/02_dim_account.sql
+-- ----------------------------------------------------------------------
+-- PURPOSE
+--   * Defines the SCD Type 2 account dimension: account type/subtype,
+--     currency, status, limits, rates and owning
+--     customer/branch/product.
+--
+-- INPUT / OUTPUT TABLES
+--   * Creates: BANKING_DW.DIM_ACCOUNT
+--   * References: BANKING_DW.DIM_CUSTOMER (CUSTOMER_ID),
+--     BANKING_DW.DIM_PRODUCT (PRODUCT_ID), BANKING_DW.DIM_BRANCH
+--     (BRANCH_ID)
+--   * Referenced by: BANKING_DW.FACT_TRANSACTION (ACCOUNT_KEY),
+--     BANKING_DW.FACT_MONTHLY_ACCOUNT_SNAPSHOT (ACCOUNT_KEY)
+--   * Used as lookup by: SP_LOAD_DAILY_TRANSACTIONS, SP_MONTHLY_SNAPSHOT
+--     and all macros/views
+--
+-- KEY BUSINESS RULES
+--   * ACCOUNT_KEY is the identity surrogate key; ACCOUNT_ID is the
+--     natural key.
+--   * SCD Type 2 control columns: EFFECTIVE_FROM, EFFECTIVE_TO (default
+--     '9999-12-31 23:59:59'), CURRENT_FLAG (default 'Y'); tracks status
+--     and rate changes.
+--   * CURRENCY_CODE defaults to 'NOK' (base currency); ACCOUNT_STATUS
+--     defaults to 'ACTIVE'; OVERDRAFT_LIMIT defaults to 0;
+--     TAX_REPORTING_FLAG defaults to 1.
+--   * Partitioned by OPENING_DATE in yearly ranges (2000-2030).
+--
+-- TERADATA-SPECIFIC FEATURES USED
+--   * CREATE MULTISET TABLE (duplicates allowed)
+--   * NO FALLBACK, NO BEFORE JOURNAL, NO AFTER JOURNAL, CHECKSUM =
+--     DEFAULT, DEFAULT MERGEBLOCKRATIO table options
+--   * GENERATED ALWAYS AS IDENTITY on ACCOUNT_KEY
+--   * NOT CASESPECIFIC; FORMAT 'YYYY-MM-DD'; COMPRESS value lists /
+--     single-value COMPRESS 0
+--   * UNIQUE PRIMARY INDEX plus secondary INDEX definitions
+--   * PARTITION BY RANGE_N (PPI)
+--   * COLLECT STATISTICS; COMMENT ON TABLE
+-- ======================================================================
+
 /**********************************************************************
  * DIM_ACCOUNT — Account Dimension
  * Teradata MULTISET table with composite primary index
