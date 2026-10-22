@@ -1,0 +1,95 @@
+/**********************************************************************
+ * Supporting ETL tables referenced by the stored procedures and scripts
+ * but NOT defined in the Teradata source repo (ddl/ has only the 7 core
+ * tables). Shapes are inferred from the procedure/script column lists and
+ * are used by run_validation.py only. Replace with the real migrated DDL
+ * of these tables before production cut-over.
+ **********************************************************************/
+
+CREATE OR REPLACE TABLE BANKING_DW.STG_CUSTOMER (
+    CUSTOMER_ID      INTEGER NOT NULL,
+    FIRST_NAME       VARCHAR(50),
+    LAST_NAME        VARCHAR(50),
+    DATE_OF_BIRTH    DATE,
+    GENDER           CHAR(1),
+    MARITAL_STATUS   CHAR(1),
+    EMAIL_ADDRESS    VARCHAR(100),
+    PHONE_NUMBER     VARCHAR(20),
+    ADDRESS_LINE_1   VARCHAR(100),
+    ADDRESS_LINE_2   VARCHAR(100),
+    CITY             VARCHAR(50),
+    STATE_PROVINCE   VARCHAR(50),
+    POSTAL_CODE      VARCHAR(10),
+    COUNTRY_CODE     CHAR(3),
+    CUSTOMER_SEGMENT VARCHAR(20),
+    RISK_SCORE       DECIMAL(5,2),
+    CREDIT_RATING    CHAR(3),
+    KYC_STATUS       VARCHAR(15)
+);
+
+CREATE OR REPLACE TABLE BANKING_DW.STG_TRANSACTIONS (
+    TRANSACTION_ID      BIGINT NOT NULL,
+    LOAD_DATE           DATE NOT NULL,
+    ACCOUNT_ID          VARCHAR(20),
+    TRANSACTION_DATE    DATE,
+    TRANSACTION_TIME    TIME(0),
+    TRANSACTION_TYPE    VARCHAR(20),
+    TRANSACTION_SUBTYPE VARCHAR(30),
+    CHANNEL             VARCHAR(20),
+    TRANSACTION_AMOUNT  DECIMAL(15,2),
+    CURRENCY_CODE       CHAR(3),
+    MERCHANT_ID         VARCHAR(20),
+    MERCHANT_NAME       VARCHAR(100),
+    MERCHANT_CATEGORY   VARCHAR(4),
+    COUNTERPARTY_ACCT   VARCHAR(20),
+    REFERENCE_NUMBER    VARCHAR(30),
+    DESCRIPTION_TEXT    VARCHAR(200),
+    POSTING_DATE        DATE,
+    VALUE_DATE          DATE
+);
+
+CREATE OR REPLACE TABLE BANKING_DW.STG_TRANSACTION_ERRORS (
+    TRANSACTION_ID      BIGINT,
+    LOAD_DATE           DATE,
+    ACCOUNT_ID          VARCHAR(20),
+    TRANSACTION_DATE    DATE,
+    TRANSACTION_TIME    TIME(0),
+    TRANSACTION_TYPE    VARCHAR(20),
+    TRANSACTION_SUBTYPE VARCHAR(30),
+    CHANNEL             VARCHAR(20),
+    TRANSACTION_AMOUNT  DECIMAL(15,2),
+    CURRENCY_CODE       CHAR(3),
+    MERCHANT_ID         VARCHAR(20),
+    MERCHANT_NAME       VARCHAR(100),
+    MERCHANT_CATEGORY   VARCHAR(4),
+    COUNTERPARTY_ACCT   VARCHAR(20),
+    REFERENCE_NUMBER    VARCHAR(30),
+    DESCRIPTION_TEXT    VARCHAR(200),
+    POSTING_DATE        DATE,
+    VALUE_DATE          DATE,
+    ERROR_REASON        VARCHAR(50),
+    BATCH_ID            BIGINT
+);
+
+CREATE OR REPLACE TABLE BANKING_DW.DIM_EXCHANGE_RATES (
+    FROM_CURRENCY  CHAR(3),
+    TO_CURRENCY    CHAR(3),
+    RATE_DATE      DATE,
+    EXCHANGE_RATE  DECIMAL(12,6)
+);
+
+CREATE OR REPLACE TABLE BANKING_DW.ETL_LOG (
+    PROCEDURE_NAME VARCHAR(128),
+    BATCH_ID       BIGINT,
+    LOG_LEVEL      VARCHAR(10),
+    LOG_MESSAGE    VARCHAR(1000),
+    LOG_TS         TIMESTAMP_NTZ(0)
+);
+
+CREATE OR REPLACE TABLE BANKING_DW.ETL_BATCH_CONTROL (
+    BATCH_ID     BIGINT,
+    BATCH_DATE   DATE,
+    BATCH_STATUS VARCHAR(20),
+    START_TS     TIMESTAMP_NTZ(0),
+    END_TS       TIMESTAMP_NTZ(0)
+);

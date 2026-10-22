@@ -1,0 +1,5 @@
+# run_validation.py dependencies (versions the emulator run was verified with)
+snowflake-connector-python==3.18.1   # fakesnow 0.12 does not import with connector 4.x/5.x
+sqlglot==30.22.0
+fakesnow==0.12.0                     # only needed for --target emulator
+duckdb==2.0.0
